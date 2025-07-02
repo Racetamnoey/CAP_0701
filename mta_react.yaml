@@ -1,0 +1,80 @@
+_schema-version: "3.2"
+ID: cap
+version: 0.0.1
+modules:
+- name: cap-destination-content
+  type: com.sap.application.content
+  requires:
+  - name: cap-destination-service
+    parameters:
+      content-target: true
+  - name: cap_html_repo_host
+    parameters:
+      service-key:
+        name: cap_html_repo_host-key
+  - name: uaa_cap
+    parameters:
+      service-key:
+        name: uaa_cap-key
+  parameters:
+    content:
+      instance:
+        destinations:
+        - Name: react_sol_cap_html_repo_host
+          ServiceInstanceName: cap-html5-app-host-service
+          ServiceKeyName: cap_html_repo_host-key
+          sap.cloud.service: react_sol
+        - Authentication: OAuth2UserTokenExchange
+          Name: react_sol_uaa_cap
+          ServiceInstanceName: cap-xsuaa-service
+          ServiceKeyName: uaa_cap-key
+          sap.cloud.service: react_sol
+        existing_destinations_policy: ignore
+  build-parameters:
+    no-source: true
+- name: cap_ui_deployer
+  type: com.sap.application.content
+  path: .
+  requires:
+  - name: cap_html_repo_host
+    parameters:
+      content-target: true
+  build-parameters:
+    build-result: resources
+    requires:
+    - artifacts:
+      - html_react_app-content.zip
+      name: html_react_app
+      target-path: resources/
+- name: html_react_app
+  type: html5
+  path: html_react_app
+  build-parameters:
+    builder: custom
+    commands:
+    - npm install
+    - npm run build
+    supported-platforms: []
+resources:
+- name: cap-destination-service
+  type: org.cloudfoundry.managed-service
+  parameters:
+    config:
+      HTML5Runtime_enabled: true
+      version: 1.0.0
+    service: destination
+    service-name: cap-destination-service
+    service-plan: lite
+- name: cap_html_repo_host
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: cap-html5-app-host-service
+    service-plan: app-host
+- name: uaa_cap
+  type: org.cloudfoundry.managed-service
+  parameters:
+    path: ./xs-security.json
+    service: xsuaa
+    service-name: cap-xsuaa-service
+    service-plan: application
