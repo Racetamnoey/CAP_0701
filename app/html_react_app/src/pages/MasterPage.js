@@ -4,9 +4,9 @@ import { DataGrid } from "@material-ui/data-grid";
 import { getTableData, getTableCount } from "api";
 
 const columns = [
-  { field: "Reqno", headerName: "Reqno", width: 250 },
-  { field: "Reqmu", headerName: "Reqmu", flex: 1 },
-  { field: "CreatedAt", headerName: "CreatedAt", flex: 1 }
+  { field: "partner", headerName: "partner", width: 250 },
+  { field: "country", headerName: "country", flex: 1 },
+  { field: "partner", headerName: "partner", flex: 1 }
 ];
 
 const PAGE_SIZE = 15;

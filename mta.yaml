@@ -89,6 +89,10 @@ modules:
             - project1.zip
           name: project1
           target-path: resources/
+        - artifacts:
+            - html_react_app-content.zip
+          name: html_react_app
+          target-path: resources/
 
   # ------------- HTML5 APPLICATION: PROJECT1 ------------------
   - name: project1
@@ -100,6 +104,18 @@ modules:
       commands:
         - npm install
         - npm run build:cf
+      supported-platforms: []
+
+  # ------------- HTML5 APPLICATION: REACT APP -----------------
+  - name: html_react_app
+    type: html5
+    path: app/html_react_app
+    build-parameters:
+      build-result: build
+      builder: custom
+      commands:
+        - npm install
+        - npm run build
       supported-platforms: []
 
 resources:
