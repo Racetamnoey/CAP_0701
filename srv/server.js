@@ -1,8 +1,8 @@
 const cds = require('@sap/cds');
 
-// 서버 시작 전 설정
+// 커스텀 엔드포인트 설정
 cds.on('bootstrap', (app) => {
-    // 기본 라우트 핸들러
+    // 홈페이지
     app.get('/', (req, res) => {
         res.send(`
             <html>
@@ -20,9 +20,9 @@ cds.on('bootstrap', (app) => {
                     <h1>CAP Service is running successfully!</h1>
                     <p>Available endpoints:</p>
                     <ul>
-                        <li><a href="/odata/v4/catalog">📊 Catalog Service (OData V4)</a></li>
-                        <li><a href="/health">❤️ Health Check</a></li>
-                        <li><a href="/project1">📱 Project1 App</a></li>
+                        <li><a href="/odata/v4/catalog"> Catalog Service (OData V4)</a></li>
+                        <li><a href="/health"> Health Check</a></li>
+                        <li><a href="/project1"> Project1 App</a></li>
                     </ul>
                     <p><em>Service Status: ✅ Active</em></p>
                 </body>
@@ -30,7 +30,7 @@ cds.on('bootstrap', (app) => {
         `);
     });
 
-    // 헬스체크 엔드포인트
+    // 헬스체크
     app.get('/health', (req, res) => {
         res.json({
             status: 'OK',
@@ -40,21 +40,7 @@ cds.on('bootstrap', (app) => {
             environment: process.env.NODE_ENV || 'development'
         });
     });
-
-    // 404 에러 처리
-    app.use((req, res, next) => {
-        if (!res.headersSent) {
-            res.status(404).json({
-                error: 'Not Found',
-                message: `Path ${req.path} not found`,
-                availableEndpoints: [
-                    '/odata/v4/catalog',
-                    '/health',
-                    '/project1'
-                ]
-            });
-        }
-    });
 });
 
+// 기본 CAP 서버 시작
 module.exports = cds.server; 
