@@ -1,7 +1,7 @@
 _schema-version: 3.3.0
 ID: test_0701
-version: 1.0.0
-description: A simple CAP project.
+version: 1.0.1
+description: A simple CAP project with managed approuter.
 
 parameters:
   enable-parallel-deployments: true
@@ -16,135 +16,142 @@ build-parameters:
         - npx -p @sap/cds-dk cds build --profile production,node
 
 modules:
-- name: test_0701-srv
-  type: nodejs
-  path: gen/srv
-  requires:
-  - name: test_0701-auth
-  - name: test_0701-db
-  provides:
-  - name: srv-api
-    properties:
-      srv-url: ${default-url}
-  parameters:
-    buildpack: nodejs_buildpack
-    instances: 1
-  build-parameters:
-    builder: npm-ci
-- name: test_0701-db-deployer
-  type: hdb
-  path: gen/db
-  requires:
-  - name: test_0701-db
-  parameters:
-    buildpack: nodejs_buildpack
-- name: test_0701
-  type: approuter.nodejs
-  path: app/router
-  requires:
-  - name: srv-api
-    group: destinations
-    properties:
-      forwardAuthToken: true
-      name: srv-api
-      url: ~{srv-url}
-  - name: test_0701-auth
-  - name: test_0701-repo-runtime
-  - name: test_0701-destination-service
-    group: destinations
-    properties:
-      forwardAuthToken: false
-      name: ui5
-      url: https://ui5.sap.com
-  provides:
-  - name: app-api
-    properties:
-      app-protocol: ${protocol}
-      app-uri: ${default-uri}
-  parameters:
-    disk-quota: 256M
-    keep-existing-routes: true
-    memory: 256M
-- name: test_0701-app-content
-  type: com.sap.application.content
-  path: .
-  requires:
-  - name: test_0701-repo-host
-    parameters:
-      content-target: true
-  build-parameters:
-    build-result: resources
+  # --------------------- SERVER MODULE ------------------------
+  - name: test_0701-srv
+    type: nodejs
+    path: gen/srv
     requires:
-    - artifacts:
-      - project1.zip
-      name: project1
-      target-path: resources/
-- name: project1
-  type: html5
-  path: app/project1
-  build-parameters:
-    build-result: dist
-    builder: custom
-    commands:
-    - npm install
-    - npm run build:cf
-    supported-platforms: []
-resources:
-- name: test_0701-auth
-  type: org.cloudfoundry.managed-service
-  parameters:
-    config:
-      oauth2-configuration:
-        redirect-uris:
-        - https://~{app-api/app-uri}/**
-      tenant-mode: dedicated
-      xsappname: test_0701-${org}-${space}
-    path: ./xs-security.json
-    service: xsuaa
-    service-plan: application
-  requires:
-  - name: app-api
-- name: test_0701-db
-  type: com.sap.xs.hdi-container
-  parameters:
-    service: hana
-    service-plan: hdi-shared
-- name: test_0701-repo-host
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: html5-apps-repo
-    service-name: test_0701-html5-service
-    service-plan: app-host
-- name: test_0701-repo-runtime
-  type: org.cloudfoundry.managed-service
-  parameters:
-    service: html5-apps-repo
-    service-name: test_0701-html5-runtime
-    service-plan: app-runtime
-- name: test_0701-destination-service
-  type: org.cloudfoundry.managed-service
-  requires:
-  - name: srv-api
-  parameters:
-    config:
-      HTML5Runtime_enabled: true
-      init_data:
+      - name: test_0701-auth
+      - name: test_0701-db
+    provides:
+      - name: srv-api
+        properties:
+          srv-url: ${default-url}
+    parameters:
+      buildpack: nodejs_buildpack
+      instances: 1
+    build-parameters:
+      builder: npm-ci
+
+  # -------------------- DATABASE DEPLOYER ---------------------
+  - name: test_0701-db-deployer
+    type: hdb
+    path: gen/db
+    requires:
+      - name: test_0701-db
+    parameters:
+      buildpack: nodejs_buildpack
+
+  # ------------------ DESTINATION CONTENT ---------------------
+  - name: test_0701-destination-content
+    type: com.sap.application.content
+    requires:
+      - name: test_0701-destination-service
+        parameters:
+          content-target: true
+      - name: test_0701-repo-host
+        parameters:
+          service-key:
+            name: test_0701-repo-host-key
+      - name: test_0701-auth
+        parameters:
+          service-key:
+            name: test_0701-auth-key
+    parameters:
+      content:
         instance:
           destinations:
-          - Name: test_0701-srv
-            URL: ~{srv-api/srv-url}
-            Authentication: NoAuthentication
-            Type: HTTP
-            ProxyType: Internet
-            HTML5.ForwardAuthToken: true
-            HTML5.DynamicDestination: true
-          - Authentication: NoAuthentication
-            Name: ui5
-            ProxyType: Internet
-            Type: HTTP
-            URL: https://ui5.sap.com
+            - Name: test_0701_html_repo_host
+              ServiceInstanceName: test_0701-html5-service
+              ServiceKeyName: test_0701-repo-host-key
+              sap.cloud.service: test_0701
+            - Authentication: OAuth2UserTokenExchange
+              Name: test_0701_uaa
+              ServiceInstanceName: test_0701-auth
+              ServiceKeyName: test_0701-auth-key
+              sap.cloud.service: test_0701
           existing_destinations_policy: update
-      version: 1.0.0
-    service: destination
-    service-name: test_0701-destination-service
-    service-plan: lite
+    build-parameters:
+      no-source: true
+
+  # ------------------ UI DEPLOYER -----------------------------
+  - name: test_0701-ui-deployer
+    type: com.sap.application.content
+    path: .
+    requires:
+      - name: test_0701-repo-host
+        parameters:
+          content-target: true
+    build-parameters:
+      build-result: resources
+      requires:
+        - artifacts:
+            - project1.zip
+          name: project1
+          target-path: resources/
+
+  # ------------- HTML5 APPLICATION: PROJECT1 ------------------
+  - name: project1
+    type: html5
+    path: app/project1
+    build-parameters:
+      build-result: dist
+      builder: custom
+      commands:
+        - npm install
+        - npm run build:cf
+      supported-platforms: []
+
+resources:
+  # ------------------------------------------------------------
+  - name: test_0701-auth
+    type: org.cloudfoundry.managed-service
+    parameters:
+      config:
+        oauth2-configuration:
+          redirect-uris:
+            - https://*.cfapps.us10-001.hana.ondemand.com/**
+        tenant-mode: dedicated
+        xsappname: test_0701-${org}-${space}
+      path: ./xs-security.json
+      service: xsuaa
+      service-plan: application
+
+  # ------------------------------------------------------------
+  - name: test_0701-db
+    type: com.sap.xs.hdi-container
+    parameters:
+      service: hana
+      service-plan: hdi-shared
+
+  # ------------------------------------------------------------
+  - name: test_0701-repo-host
+    type: org.cloudfoundry.managed-service
+    parameters:
+      service: html5-apps-repo
+      service-name: test_0701-html5-service
+      service-plan: app-host
+
+  # ------------------------------------------------------------
+  - name: test_0701-destination-service
+    type: org.cloudfoundry.managed-service
+    requires:
+      - name: srv-api
+    parameters:
+      config:
+        HTML5Runtime_enabled: true
+        init_data:
+          instance:
+            destinations:
+              - Name: test_0701-srv
+                URL: ~{srv-api/srv-url}
+                Authentication: NoAuthentication
+                Type: HTTP
+                ProxyType: Internet
+                HTML5.ForwardAuthToken: true
+                HTML5.DynamicDestination: true
+            existing_destinations_policy: update
+        version: 1.0.0
+      service: destination
+      service-name: test_0701-destination-service
+      service-plan: lite

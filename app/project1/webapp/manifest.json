@@ -21,7 +21,8 @@
         "type": "OData",
         "settings": {
           "annotations": [],
-          "odataVersion": "4.0"
+          "odataVersion": "4.0",
+          "localUri": "localService/metadata.xml"
         }
       }
     }
@@ -161,5 +162,9 @@
   "sap.fiori": {
     "registrationIds": [],
     "archeType": "transactional"
+  },
+  "sap.cloud": {
+    "public": true,
+    "service": "test_0701"
   }
 }
