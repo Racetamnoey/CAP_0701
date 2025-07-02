@@ -36,6 +36,7 @@ modules:
       name: srv-api
       url: ~{srv-url}
   - name: test_0701-auth
+  - name: test_0701-repo-runtime
   - name: test_0701-destination-service
     group: destinations
     properties:
@@ -101,6 +102,12 @@ resources:
     service: html5-apps-repo
     service-name: test_0701-html5-service
     service-plan: app-host
+- name: test_0701-repo-runtime
+  type: org.cloudfoundry.managed-service
+  parameters:
+    service: html5-apps-repo
+    service-name: test_0701-html5-runtime
+    service-plan: app-runtime
 - name: test_0701-destination-service
   type: org.cloudfoundry.managed-service
   parameters:
