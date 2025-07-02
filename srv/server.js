@@ -20,9 +20,9 @@ cds.on('bootstrap', (app) => {
                     <h1>CAP Service is running successfully!</h1>
                     <p>Available endpoints:</p>
                     <ul>
-                        <li><a href="/odata/v4/catalog"> Catalog Service (OData V4)</a></li>
-                        <li><a href="/health"> Health Check</a></li>
-                        <li><a href="/project1"> Project1 App</a></li>
+                        <li><a href="/odata/v4/catalog">📊 Catalog Service (OData V4)</a></li>
+                        <li><a href="/health">❤️ Health Check</a></li>
+                        <li><a href="https://ikd-saas-test-0701.cfapps.us10-001.hana.ondemand.com/project1">📱 Project1 App (via Approuter)</a></li>
                     </ul>
                     <p><em>Service Status: ✅ Active</em></p>
                 </body>

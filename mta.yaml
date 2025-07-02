@@ -1,7 +1,20 @@
 _schema-version: 3.3.0
 ID: test_0701
-description: A simple CAP project.
 version: 1.0.0
+description: A simple CAP project.
+
+parameters:
+  enable-parallel-deployments: true
+  deploy_mode: html5-repo
+
+build-parameters:
+  before-all:
+    - builder: custom
+      commands:
+        # set 'CDS_ENV=node' to pick the 'node' build profile settings, defined in package.json
+        - npm ci
+        - npx -p @sap/cds-dk cds build --profile production,node
+
 modules:
 - name: test_0701-srv
   type: nodejs
@@ -110,12 +123,21 @@ resources:
     service-plan: app-runtime
 - name: test_0701-destination-service
   type: org.cloudfoundry.managed-service
+  requires:
+  - name: srv-api
   parameters:
     config:
-      HTML5Runtime_enabled: false
+      HTML5Runtime_enabled: true
       init_data:
         instance:
           destinations:
+          - Name: test_0701-srv
+            URL: ~{srv-api/srv-url}
+            Authentication: NoAuthentication
+            Type: HTTP
+            ProxyType: Internet
+            HTML5.ForwardAuthToken: true
+            HTML5.DynamicDestination: true
           - Authentication: NoAuthentication
             Name: ui5
             ProxyType: Internet
@@ -126,12 +148,3 @@ resources:
     service: destination
     service-name: test_0701-destination-service
     service-plan: lite
-parameters:
-  deploy_mode: html5-repo
-  enable-parallel-deployments: true
-build-parameters:
-  before-all:
-  - builder: custom
-    commands:
-    - npm ci
-    - npx cds build --production

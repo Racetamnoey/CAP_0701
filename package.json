@@ -34,7 +34,7 @@
       "auth": "mocked",
       "db": "hana",
       "[production]": {
-        "auth": "xsuaa",
+        "auth": "mocked",
         "db": {
           "kind": "hana",
           "credentials": {}
