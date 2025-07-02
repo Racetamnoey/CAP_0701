@@ -1,6 +1,7 @@
 using app.interactions from '../db/interactions';
-using {sap} from '@sap/cds-common-content';
+using {sap} from '@sap/cds/common';
 
+@path: '/odata/v4/catalog'
 service CatalogService {
 
     @odata.draft.enabled: true

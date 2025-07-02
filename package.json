@@ -26,7 +26,7 @@
     "start": "cds-serve",
     "watch-project1": "cds watch --open project1/webapp/index.html?sap-ui-xx-viewCache=false",
     "undeploy": "cf undeploy test_0701 --delete-services --delete-service-keys --delete-service-brokers",
-    "build": "rimraf resources mta_archives && mbt build --mtar archive",
+    "build": "npx rimraf resources mta_archives && npx mbt build --mtar archive",
     "deploy": "cf deploy mta_archives/archive.mtar --retries 1"
   },
   "cds": {
@@ -34,8 +34,22 @@
       "auth": "mocked",
       "db": "hana",
       "[production]": {
-        "auth": "xsuaa"
+        "auth": "xsuaa",
+        "db": {
+          "kind": "hana",
+          "credentials": {}
+        }
+      },
+      "[development]": {
+        "auth": "mocked",
+        "db": "sqlite"
       }
+    },
+    "features": {
+      "preserve_computed": true
+    },
+    "log": {
+      "service": true
     }
   },
   "sapux": [

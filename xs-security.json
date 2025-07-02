@@ -1,6 +1,55 @@
 {
-  "scopes": [],
+  "xsappname": "test_0701",
+  "tenant-mode": "dedicated",
+  "scopes": [
+    {
+      "name": "$XSAPPNAME.Display",
+      "description": "Display access"
+    },
+    {
+      "name": "$XSAPPNAME.Create",
+      "description": "Create access"
+    },
+    {
+      "name": "$XSAPPNAME.Edit",
+      "description": "Edit access"
+    },
+    {
+      "name": "$XSAPPNAME.Delete",
+      "description": "Delete access"
+    }
+  ],
   "attributes": [],
-  "role-templates": [],
-  "authorities-inheritance": false
+  "role-templates": [
+    {
+      "name": "Viewer",
+      "description": "View access to application",
+      "scope-references": [
+        "$XSAPPNAME.Display"
+      ]
+    },
+    {
+      "name": "Editor",
+      "description": "Edit access to application",
+      "scope-references": [
+        "$XSAPPNAME.Display",
+        "$XSAPPNAME.Create",
+        "$XSAPPNAME.Edit"
+      ]
+    },
+    {
+      "name": "Admin",
+      "description": "Admin access to application",
+      "scope-references": [
+        "$XSAPPNAME.Display",
+        "$XSAPPNAME.Create",
+        "$XSAPPNAME.Edit",
+        "$XSAPPNAME.Delete"
+      ]
+    }
+  ],
+  "authorities-inheritance": false,
+  "oauth2-configuration": {
+    "redirect-uris": ["https://*.cfapps.sap.hana.ondemand.com/**"]
+  }
 }

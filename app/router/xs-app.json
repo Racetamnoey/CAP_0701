@@ -2,6 +2,19 @@
   "authenticationMethod": "none",
   "routes": [
     {
+      "source": "^/health$",
+      "target": "/health",
+      "destination": "srv-api",
+      "authenticationType": "none"
+    },
+    {
+      "source": "^/odata/(.*)$",
+      "target": "/odata/$1",
+      "destination": "srv-api",
+      "authenticationType": "none",
+      "csrfProtection": false
+    },
+    {
       "source": "^/app/(.*)$",
       "target": "$1",
       "localDir": ".",
@@ -11,6 +24,24 @@
       "source": "^/appconfig/",
       "localDir": ".",
       "cacheControl": "no-cache, no-store, must-revalidate"
+    },
+    {
+      "source": "^/project1/(.*)$",
+      "target": "/project1/$1",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    },
+    {
+      "source": "^/project1$",
+      "target": "/project1/",
+      "service": "html5-apps-repo-rt",
+      "authenticationType": "xsuaa"
+    },
+    {
+      "source": "^/$",
+      "target": "/",
+      "destination": "srv-api",
+      "authenticationType": "none"
     },
     {
       "source": "^/(.*)$",
